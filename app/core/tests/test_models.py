@@ -8,7 +8,7 @@ def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
 
-class ModelTests(TestCase):
+class ModelsTests(TestCase):
 
     def test_create_user_with_email_successful(self):
         email = 'test@example.com'
