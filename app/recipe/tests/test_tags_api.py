@@ -45,7 +45,6 @@ class PrivateTagsApiTests(TestCase):
         Tag.objects.create(user=self.user, name='Dessert')
 
         res = self.client.get(TAGS_URL)
-
         tags = Tag.objects.all().order_by('-name')
         serializer = TagSerializer(tags, many=True)
 
@@ -68,8 +67,8 @@ class PrivateTagsApiTests(TestCase):
         tag = Tag.objects.create(user=self.user, name='After Dinner')
         payload = {'name': 'Dessert'}
         url = detail_url(tag.id)
-        res = self.client.patch(url, payload)
 
+        res = self.client.patch(url, payload)
         tag.refresh_from_db()
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -77,10 +76,9 @@ class PrivateTagsApiTests(TestCase):
 
     def test_delete_tag(self):
         tag = Tag.objects.create(user=self.user, name='Breakfast')
-
         url = detail_url(tag.id)
-        res = self.client.delete(url)
 
+        res = self.client.delete(url)
         tags = Tag.objects.filter(user=self.user)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -89,7 +87,6 @@ class PrivateTagsApiTests(TestCase):
     def test_filter_tags_assigned_to_recipes(self):
         tag1 = Tag.objects.create(user=self.user, name='Dessert')
         tag2 = Tag.objects.create(user=self.user, name='Salad')
-
         recipe = Recipe.objects.create(
             user=self.user,
             title='Apple Crumble',
@@ -99,7 +96,6 @@ class PrivateTagsApiTests(TestCase):
         recipe.tags.add(tag1)
 
         res = self.client.get(TAGS_URL, {'assigned_only': 1})
-
         s1 = TagSerializer(tag1)
         s2 = TagSerializer(tag2)
 
@@ -109,7 +105,6 @@ class PrivateTagsApiTests(TestCase):
     def test_filtered_tags_unique(self):
         tag1 = Tag.objects.create(user=self.user, name='Main course')
         Tag.objects.create(user=self.user, name='Dessert')
-
         recipe1 = Recipe.objects.create(
             user=self.user,
             title='Spaghetti Bolognese',
@@ -122,7 +117,6 @@ class PrivateTagsApiTests(TestCase):
             time_minutes=15,
             price=Decimal('18.00')
         )
-
         recipe1.tags.add(tag1)
         recipe2.tags.add(tag1)
 

@@ -46,7 +46,6 @@ class PrivateIngredientApiTests(TestCase):
         Ingredient.objects.create(user=self.user, name='Vanilla')
 
         res = self.client.get(INGREDIENTS_URL)
-
         ingredients = Ingredient.objects.all().order_by('-name')
         serializer = IngredientSerializer(ingredients, many=True)
 
@@ -67,11 +66,10 @@ class PrivateIngredientApiTests(TestCase):
 
     def test_update_ingredient(self):
         ingredient = Ingredient.objects.create(user=self.user, name='Cilantro')
-
         payload = {'name': 'Coriander'}
         url = detail_url(ingredient.id)
-        res = self.client.patch(url, payload)
 
+        res = self.client.patch(url, payload)
         ingredient.refresh_from_db()
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -79,10 +77,9 @@ class PrivateIngredientApiTests(TestCase):
 
     def test_delete_ingredient(self):
         ingredient = Ingredient.objects.create(user=self.user, name='Lettuce')
-
         url = detail_url(ingredient.id)
-        res = self.client.delete(url)
 
+        res = self.client.delete(url)
         ingredients = Ingredient.objects.filter(user=self.user)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -91,7 +88,6 @@ class PrivateIngredientApiTests(TestCase):
     def test_filter_ingredients_assigned_to_recipes(self):
         ingredient1 = Ingredient.objects.create(user=self.user, name='Apple')
         ingredient2 = Ingredient.objects.create(user=self.user, name='Pear')
-
         recipe = Recipe.objects.create(
             user=self.user,
             title='Apple Crumble',
@@ -101,7 +97,6 @@ class PrivateIngredientApiTests(TestCase):
         recipe.ingredients.add(ingredient1)
 
         res = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
-
         s1 = IngredientSerializer(ingredient1)
         s2 = IngredientSerializer(ingredient2)
 
@@ -111,7 +106,6 @@ class PrivateIngredientApiTests(TestCase):
     def test_filtered_ingredients_unique(self):
         ingredient1 = Ingredient.objects.create(user=self.user, name='Spaghetti') # noqa
         Ingredient.objects.create(user=self.user, name='Blueberry')
-
         recipe1 = Recipe.objects.create(
             user=self.user,
             title='Spaghetti Bolognese',
@@ -124,7 +118,6 @@ class PrivateIngredientApiTests(TestCase):
             time_minutes=15,
             price=Decimal('18.00')
         )
-
         recipe1.ingredients.add(ingredient1)
         recipe2.ingredients.add(ingredient1)
 

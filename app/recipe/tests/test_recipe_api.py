@@ -34,9 +34,10 @@ def create_recipe(user, **params):
         'description': 'Sample description',
         'link': 'http://example.com/recipe.pdf'
     }
-    defaults.update(params)
 
+    defaults.update(params)
     recipe = Recipe.objects.create(user=user, **defaults)
+
     return recipe
 
 
@@ -72,6 +73,7 @@ class PrivateRecipeApiTests(TestCase):
         res = self.client.get(RECIPES_URL)
         recipes = Recipe.objects.all().order_by('-id')
         serializer = RecipeSerializer(recipes, many=True)
+
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
@@ -80,20 +82,20 @@ class PrivateRecipeApiTests(TestCase):
             email='another@email.com',
             password='testpass123'
         )
-
         create_recipe(user=another_user)
         create_recipe(user=self.user)
 
         res = self.client.get(RECIPES_URL)
         recipes = Recipe.objects.filter(user=self.user)
         serializer = RecipeSerializer(recipes, many=True)
+
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
     def test_get_recipe_detail(self):
         recipe = create_recipe(user=self.user)
-
         url = detail_url(recipe.id)
+
         res = self.client.get(url)
 
         serializer = RecipeDetailSerializer(recipe)
@@ -105,6 +107,7 @@ class PrivateRecipeApiTests(TestCase):
             'time_minutes': 30,
             'price': Decimal('5.99')
         }
+
         res = self.client.post(RECIPES_URL, payload)
         recipe = Recipe.objects.get(id=res.data['id'])
 
@@ -121,10 +124,9 @@ class PrivateRecipeApiTests(TestCase):
             link=initial_link
         )
         payload = {'title': 'Updated title'}
-
         url = detail_url(recipe.id)
-        res = self.client.patch(url, payload)
 
+        res = self.client.patch(url, payload)
         recipe.refresh_from_db()
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -146,10 +148,9 @@ class PrivateRecipeApiTests(TestCase):
             'time_minutes': 10,
             'price': Decimal('2.50')
         }
-
         url = detail_url(recipe.id)
-        res = self.client.put(url, payload)
 
+        res = self.client.put(url, payload)
         recipe.refresh_from_db()
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -160,18 +161,18 @@ class PrivateRecipeApiTests(TestCase):
     def test_update_user_returns_error(self):
         new_user = create_user(email='user2@email.com', password='pass123')
         recipe = create_recipe(user=self.user)
-
         payload = {'user': new_user.id}
         url = detail_url(recipe.id)
-        self.client.patch(url, payload)
 
+        self.client.patch(url, payload)
         recipe.refresh_from_db()
+
         self.assertEqual(recipe.user, self.user)
 
     def test_delete_recipe(self):
         recipe = create_recipe(user=self.user)
-
         url = detail_url(recipe.id)
+
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
@@ -180,8 +181,8 @@ class PrivateRecipeApiTests(TestCase):
     def test_deleting_other_users_recipe_error(self):
         new_user = create_user(email='user2@email.com', password='pass123')
         recipe = create_recipe(user=new_user)
-
         url = detail_url(recipe.id)
+
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -194,8 +195,8 @@ class PrivateRecipeApiTests(TestCase):
             'price': Decimal('2.50'),
             'tags': [{'name': 'Thai'}, {'name': 'Dinner'}]
         }
-        res = self.client.post(RECIPES_URL, payload, format='json')
 
+        res = self.client.post(RECIPES_URL, payload, format='json')
         recipes = Recipe.objects.filter(user=self.user)
         recipe = recipes[0]
 
@@ -214,8 +215,8 @@ class PrivateRecipeApiTests(TestCase):
             'price': Decimal('3.50'),
             'tags': [{'name': 'French'}, {'name': 'Breakfast'}]
         }
-        res = self.client.post(RECIPES_URL, payload, format='json')
 
+        res = self.client.post(RECIPES_URL, payload, format='json')
         recipes = Recipe.objects.filter(user=self.user)
         recipe = recipes[0]
 
@@ -236,7 +237,6 @@ class PrivateRecipeApiTests(TestCase):
         url = detail_url(recipe.id)
 
         res = self.client.patch(url, payload, format='json')
-
         new_tag = Tag.objects.get(user=self.user, name='Lunch')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -246,10 +246,10 @@ class PrivateRecipeApiTests(TestCase):
         tag_breakfast = Tag.objects.create(user=self.user, name='Breakfast')
         recipe = create_recipe(user=self.user)
         recipe.tags.add(tag_breakfast)
-
         tag_lunch = Tag.objects.create(user=self.user, name='Lunch')
         payload = {'tags': [{'name': 'Lunch'}]}
         url = detail_url(recipe.id)
+
         res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -260,9 +260,9 @@ class PrivateRecipeApiTests(TestCase):
         tag = Tag.objects.create(user=self.user, name='Dessert')
         recipe = create_recipe(user=self.user)
         recipe.tags.add(tag)
-
         payload = {'tags': []}
         url = detail_url(recipe.id)
+
         res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -275,8 +275,8 @@ class PrivateRecipeApiTests(TestCase):
             'price': Decimal('4.30'),
             'ingredients': [{'name': 'Cauliflower'}, {'name': 'Salt'}],
         }
-        res = self.client.post(RECIPES_URL, payload, format='json')
 
+        res = self.client.post(RECIPES_URL, payload, format='json')
         recipes = Recipe.objects.filter(user=self.user)
         recipe = recipes[0]
 
@@ -298,8 +298,8 @@ class PrivateRecipeApiTests(TestCase):
             'price': '2.55',
             'ingredients': [{'name': 'Lemon'}, {'name': 'Fish Sauce'}],
         }
-        res = self.client.post(RECIPES_URL, payload, format='json')
 
+        res = self.client.post(RECIPES_URL, payload, format='json')
         recipes = Recipe.objects.filter(user=self.user)
         recipe = recipes[0]
 
@@ -316,11 +316,10 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_create_ingredient_on_update(self):
         recipe = create_recipe(user=self.user)
-
         payload = {'ingredients': [{'name': 'Limes'}]}
         url = detail_url(recipe.id)
-        res = self.client.patch(url, payload, format='json')
 
+        res = self.client.patch(url, payload, format='json')
         new_ingredient = Ingredient.objects.get(user=self.user, name='Limes')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -331,9 +330,9 @@ class PrivateRecipeApiTests(TestCase):
         ingredient2 = Ingredient.objects.create(user=self.user, name='Chili')
         recipe = create_recipe(user=self.user)
         recipe.ingredients.add(ingredient1)
-
         payload = {'ingredients': [{'name': 'Chili'}]}
         url = detail_url(recipe.id)
+
         res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -344,9 +343,9 @@ class PrivateRecipeApiTests(TestCase):
         ingredient = Ingredient.objects.create(user=self.user, name='Garlic')
         recipe = create_recipe(user=self.user)
         recipe.ingredients.add(ingredient)
-
         payload = {'ingredients': []}
         url = detail_url(recipe.id)
+
         res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -356,16 +355,13 @@ class PrivateRecipeApiTests(TestCase):
         recipe1 = create_recipe(user=self.user, title='Tiramisu')
         recipe2 = create_recipe(user=self.user, title='Cheesecake')
         recipe3 = create_recipe(user=self.user, title='Apple pie')
-
         tag1 = Tag.objects.create(user=self.user, name='Dessert')
         tag2 = Tag.objects.create(user=self.user, name='Gluten free')
-
         recipe1.tags.add(tag1)
         recipe2.tags.add(tag2)
-
         params = {'tags': f'{tag1.id},{tag2.id}'}
-        res = self.client.get(RECIPES_URL, params)
 
+        res = self.client.get(RECIPES_URL, params)
         s1 = RecipeSerializer(recipe1)
         s2 = RecipeSerializer(recipe2)
         s3 = RecipeSerializer(recipe3)
@@ -378,16 +374,13 @@ class PrivateRecipeApiTests(TestCase):
         recipe1 = create_recipe(user=self.user, title='Tiramisu')
         recipe2 = create_recipe(user=self.user, title='Cheesecake')
         recipe3 = create_recipe(user=self.user, title='Apple pie')
-
         ingredient1 = Ingredient.objects.create(user=self.user, name='Milk')
         ingredient2 = Ingredient.objects.create(user=self.user, name='Sugar')
-
         recipe1.ingredients.add(ingredient1)
         recipe2.ingredients.add(ingredient2)
-
         params = {'ingredients': f'{ingredient1.id},{ingredient2.id}'}
-        res = self.client.get(RECIPES_URL, params)
 
+        res = self.client.get(RECIPES_URL, params)
         s1 = RecipeSerializer(recipe1)
         s2 = RecipeSerializer(recipe2)
         s3 = RecipeSerializer(recipe3)
@@ -419,7 +412,6 @@ class ImageUploadTests(TestCase):
             image_file.seek(0)
             payload = {'image': image_file}
             res = self.client.post(url, payload, format='multipart')
-
         self.recipe.refresh_from_db()
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -429,6 +421,7 @@ class ImageUploadTests(TestCase):
     def test_upload_image_bad_request(self):
         url = image_upload_url(self.recipe.id)
         payload = {'image': 'notanimage'}
+
         res = self.client.post(url, payload, format='multipart')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
