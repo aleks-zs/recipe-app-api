@@ -1,5 +1,5 @@
 # recipe-app-api
-## Django Recipe API Project
+## DRF Recipe API Project
 REST API about recipes
 
 ### To start:
